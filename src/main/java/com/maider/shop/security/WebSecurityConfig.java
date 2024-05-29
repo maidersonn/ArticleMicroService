@@ -1,6 +1,5 @@
 package com.maider.shop.security;
 
-import com.maider.shop.domain.services.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,17 +21,7 @@ public class WebSecurityConfig {
     @Autowired
     JWTAuthorizationFilter jwtAuthorizationFilter;
     @Autowired
-    private AuthEntryPointJWT unauthorizedHandler;
-    @Autowired
-    UserDetailsServiceImpl userDetailsService;
-    @Bean
-    public DaoAuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(userDetailsService);
-        authProvider.setPasswordEncoder(new BCryptPasswordEncoder());
-        return authProvider;
-    }
-
+    AuthEntryPointJWT unauthorizedHandler;
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
         return authConfig.getAuthenticationManager();
@@ -52,8 +41,6 @@ public class WebSecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/login").permitAll()
                         .anyRequest().authenticated()
                 );
-        http.authenticationProvider(authenticationProvider());
-
         http.addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
