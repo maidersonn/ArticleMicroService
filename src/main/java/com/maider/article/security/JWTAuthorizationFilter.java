@@ -1,6 +1,7 @@
 package com.maider.article.security;
 
 import com.maider.article.domain.entities.User;
+import com.maider.article.domain.services.UserService;
 import io.jsonwebtoken.*;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -30,7 +31,7 @@ public class JWTAuthorizationFilter  extends OncePerRequestFilter {
         try {
             if (isJWTValid(request, response)) {
                 Claims claims = setSigningKey(request);
-                User user = userService.getUserByName(claims.getSubject());
+                User user = userService.getUser(claims.getSubject());
                 setAuthentication(user);
             } else {
                 SecurityContextHolder.clearContext();
