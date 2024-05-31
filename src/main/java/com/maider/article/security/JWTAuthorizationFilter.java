@@ -1,5 +1,6 @@
 package com.maider.article.security;
 
+import com.maider.article.domain.entities.User;
 import io.jsonwebtoken.*;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -55,7 +57,7 @@ public class JWTAuthorizationFilter  extends OncePerRequestFilter {
 
         UsernamePasswordAuthenticationToken auth =
                 new UsernamePasswordAuthenticationToken(user.getName(), null,
-                        user.getRoles().stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList()));
+                        Arrays.stream(user.getRoles()).map(SimpleGrantedAuthority::new).collect(Collectors.toList()));
 
         SecurityContextHolder.getContext().setAuthentication(auth);
     }
