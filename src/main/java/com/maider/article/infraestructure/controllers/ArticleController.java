@@ -1,16 +1,16 @@
-package com.maider.article.controllers;
+package com.maider.article.infraestructure.controllers;
 
-import com.maider.article.controllers.dto.FilterDTO;
-import com.maider.article.controllers.mapper.ArticleFilterMapper;
+import com.maider.article.domain.entities.dto.FilterDTO;
+import com.maider.article.infraestructure.controllers.mapper.ArticleFilterMapper;
 import com.maider.article.domain.entities.Article;
 import com.maider.article.domain.entities.ArticleFilter;
 import com.maider.article.domain.services.errors.ShopError;
 import com.maider.article.result.Result;
 import com.maider.article.result.Success;
 import com.maider.article.domain.services.ArticleService;
-import com.maider.article.controllers.dto.ArticleDTO;
-import com.maider.article.controllers.dto.ArticleCreationDTO;
-import com.maider.article.controllers.mapper.ArticleMapper;
+import com.maider.article.domain.entities.dto.ArticleDTO;
+import com.maider.article.domain.entities.dto.ArticleCreationDTO;
+import com.maider.article.infraestructure.controllers.mapper.ArticleMapper;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

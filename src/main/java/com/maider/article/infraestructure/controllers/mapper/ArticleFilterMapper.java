@@ -1,6 +1,6 @@
-package com.maider.article.controllers.mapper;
+package com.maider.article.infraestructure.controllers.mapper;
 
-import com.maider.article.controllers.dto.FilterDTO;
+import com.maider.article.domain.entities.dto.FilterDTO;
 import com.maider.article.domain.entities.ArticleFilter;
 import org.springframework.stereotype.Component;
 

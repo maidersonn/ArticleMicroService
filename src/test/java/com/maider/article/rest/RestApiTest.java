@@ -1,12 +1,14 @@
 package com.maider.article.rest;
 
 import com.maider.article.articleFactory.ArticleFactory;
-import com.maider.article.controllers.dto.ArticleCreationDTO;
-import com.maider.article.controllers.dto.ArticleDTO;
+import com.maider.article.domain.entities.dto.ArticleCreationDTO;
+import com.maider.article.domain.entities.dto.ArticleDTO;
 import com.maider.article.domain.entities.Article;
 import com.maider.article.domain.entities.ArticleBuilder;
 import com.maider.article.domain.entities.ArticleFilter;
+import com.maider.article.domain.entities.User;
 import com.maider.article.domain.repositories.ArticleRepository;
+import com.maider.article.domain.repositories.UserRepositoy;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -31,13 +33,15 @@ public class RestApiTest {
     @LocalServerPort
     private int port;
     @Autowired
-    JpaRepository jpaRepository;
+    JpaRepository<Article, Long> jpaRepository;
     @Autowired
     private TestRestTemplate restTemplate;
     @Autowired
     private JWTUtils jwtAuthenticationConfig;
     @MockBean
     private ArticleRepository articleRepository;
+    @MockBean
+    private UserRepositoy userRepositoy;
     @AfterEach
     void clearDataBase() {
         jpaRepository.deleteAll();
@@ -46,17 +50,22 @@ public class RestApiTest {
     @Test
     void shouldReturnArticleDTOForCreateEndpoint() {
         ArticleCreationDTO  creationDto= new ArticleCreationDTO("trousers", "leather", "Lewis", 40, 80.0);
+
         Article article = ArticleFactory.createOne();
         Article articleReturned = ArticleFactory.createOne();
         articleReturned.setId(1L);
+        Mockito.when(articleRepository.save(article)).thenReturn(articleReturned);
+
+        String[] roles = new String[] { "ROLE_ADMIN" };
+        Mockito.when(userRepositoy.findByUsername("maidersonn")).thenReturn(new User(1L,"maidersonn", roles));
+
         String token = jwtAuthenticationConfig.getJWTToken("maidersonn");
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", token);
         HttpEntity<?> request = new HttpEntity<>(creationDto, headers);
 
-        Mockito.when(articleRepository.save(article)).thenReturn(articleReturned);
-
-        ArticleDTO response = this.restTemplate.postForEntity("http://localhost:" + port + "/article", request, ArticleDTO.class).getBody();
+        ResponseEntity<ArticleDTO> responseEntity = this.restTemplate.postForEntity("http://localhost:" + port + "/article", request, ArticleDTO.class);
+        ArticleDTO response = responseEntity.getBody();
 
         assertNotNull(response);
         assertEquals("leathertrousers", response.getName());
@@ -70,10 +79,18 @@ public class RestApiTest {
         List<Article> articles = ArticleFactory.create(2);
         Mockito.when(articleRepository.findAll()).thenReturn(articles);
 
+        String[] roles = new String[] { "ROLE_USER" };
+        Mockito.when(userRepositoy.findByUsername("maidersonn")).thenReturn(new User(1L,"maidersonn", roles));
+
+        String token = jwtAuthenticationConfig.getJWTToken("maidersonn");
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", token);
+        HttpEntity<?> request = new HttpEntity<>(headers);
+
         List<ArticleDTO> response = this.restTemplate
                 .exchange("http://localhost:" + port + "/articles",
                         HttpMethod.GET,
-                        null,
+                        request,
                         new ParameterizedTypeReference<List<ArticleDTO>>() {})
                 .getBody();
 
@@ -88,7 +105,15 @@ public class RestApiTest {
         articleReturned.setId(1L);
         Mockito.when(articleRepository.getReferenceById(1L)).thenReturn(articleReturned);
 
-        ArticleDTO response = this.restTemplate.getForEntity("http://localhost:" + port + "/article/1", ArticleDTO.class).getBody();
+        String[] roles = new String[] { "ROLE_USER" };
+        Mockito.when(userRepositoy.findByUsername("maidersonn")).thenReturn(new User(1L,"maidersonn", roles));
+
+        String token = jwtAuthenticationConfig.getJWTToken("maidersonn");
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", token);
+        HttpEntity<?> request = new HttpEntity<>(headers);
+
+        ArticleDTO response = this.restTemplate.exchange("http://localhost:" + port + "/article/1", HttpMethod.GET, request, ArticleDTO.class).getBody();
 
         assertNotNull(response);
         assertEquals(1, response.getId());
@@ -101,7 +126,15 @@ public class RestApiTest {
     void shouldReturnArticleNotFoundWhenObjectDoesNotExist() {
        Mockito.when(articleRepository.getReferenceById(1L)).thenThrow(new EntityNotFoundException());
 
-       String response = this.restTemplate.getForEntity("http://localhost:" + port + "/article/1", String.class).getBody();
+        String[] roles = new String[] { "ROLE_USER" };
+        Mockito.when(userRepositoy.findByUsername("maidersonn")).thenReturn(new User(1L,"maidersonn", roles));
+
+        String token = jwtAuthenticationConfig.getJWTToken("maidersonn");
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", token);
+        HttpEntity<?> request = new HttpEntity<>(headers);
+
+       String response = this.restTemplate.exchange("http://localhost:" + port + "/article/1", HttpMethod.GET, request, String.class).getBody();
 
        assertEquals("Article not found", response);
     }
@@ -109,12 +142,17 @@ public class RestApiTest {
     void shouldReturnResponseEntityForDeleteEndpoint() {
         Article article = ArticleFactory.createOne();
         article.setId(1L);
+        doAnswer(invocation -> null).when(articleRepository).deleteById(1L);
+
+        String[] roles = new String[] { "ROLE_ADMIN" };
+        Mockito.when(userRepositoy.findByUsername("maidersonn")).thenReturn(new User(1L,"maidersonn", roles));
+
         String token = jwtAuthenticationConfig.getJWTToken("maidersonn");
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", token);
         HttpEntity<?> request = new HttpEntity<>(null, headers);
 
-        doAnswer(invocation -> null).when(articleRepository).deleteById(1L);
+
 
         ResponseEntity<?> response = this.restTemplate.exchange("http://localhost:" + port + "/article/1", HttpMethod.DELETE, request, ResponseEntity.class);
 
@@ -126,13 +164,16 @@ public class RestApiTest {
         Article articleToUpdate = ArticleFactory.createOne();
         articleToUpdate.setId(1L);
         articleToUpdate.setPrice(52);
+        Mockito.when(articleRepository.existsById(1L)).thenReturn(true);
+        Mockito.when(articleRepository.save(articleToUpdate)).thenReturn(articleToUpdate);
+
+        String[] roles = new String[] { "ROLE_ADMIN" };
+        Mockito.when(userRepositoy.findByUsername("maidersonn")).thenReturn(new User(1L,"maidersonn", roles));
+
         String token = jwtAuthenticationConfig.getJWTToken("maidersonn");
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", token);
         HttpEntity<?> request = new HttpEntity<>(articleCreation, headers);
-        Mockito.when(articleRepository.existsById(1L)).thenReturn(true);
-        Mockito.when(articleRepository.save(articleToUpdate)).thenReturn(articleToUpdate);
-
 
         ResponseEntity<ArticleDTO> response = this.restTemplate.exchange("http://localhost:" + port + "/article/1", HttpMethod.PUT, request, ArticleDTO.class);
 
@@ -150,10 +191,18 @@ public class RestApiTest {
         ArticleFilter articleFilter = new ArticleFilter("trousers", 39, null, "leather", "Lewis", 80.0, null);
         Mockito.when(articleRepository.filter(articleFilter)).thenReturn(articles);
 
+        String[] roles = new String[] { "ROLE_USER" };
+        Mockito.when(userRepositoy.findByUsername("maidersonn")).thenReturn(new User(1L,"maidersonn", roles));
+
+        String token = jwtAuthenticationConfig.getJWTToken("maidersonn");
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", token);
+        HttpEntity<?> request = new HttpEntity<>(headers);
+
         List<ArticleDTO> response = this.restTemplate
                 .exchange("http://localhost:" + port + "/articles/filtered?type=trousers&sizeLessThan=39&material=leather&brand=Lewis&priceLessThan=80.0",
                         HttpMethod.GET,
-                        null,
+                        request,
                         new ParameterizedTypeReference<List<ArticleDTO>>() {})
                 .getBody();
 

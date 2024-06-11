@@ -2,7 +2,6 @@ package com.maider.article.domain.services;
 
 import com.maider.article.domain.entities.User;
 import com.maider.article.domain.repositories.UserRepositoy;
-import com.maider.article.result.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -10,7 +9,7 @@ import org.springframework.stereotype.Service;
 public class UserService {
     @Autowired
     UserRepositoy userRepositoy;
-    public User getUser(String username) {
-        return userRepositoy.findByUsername(username);
+    public User getUser(String name) {
+        return userRepositoy.findByUsername(name);
     }
 }

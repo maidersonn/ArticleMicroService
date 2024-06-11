@@ -1,4 +1,4 @@
-package com.maider.article.security;
+package com.maider.article.config.auth;
 
 import com.maider.article.domain.entities.User;
 import com.maider.article.domain.services.UserService;
@@ -7,24 +7,26 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.maider.article.security.Constants.*;
+import static com.maider.article.config.auth.Constants.*;
 
 @Component
 public class JWTAuthorizationFilter  extends OncePerRequestFilter {
     @Value("${secret.key}")
     String secretKey;
+    @Autowired
     UserService userService;
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -32,12 +34,13 @@ public class JWTAuthorizationFilter  extends OncePerRequestFilter {
             if (isJWTValid(request, response)) {
                 Claims claims = setSigningKey(request);
                 User user = userService.getUser(claims.getSubject());
+                if(user == null) throw new UsernameNotFoundException("User not found");
                 setAuthentication(user);
             } else {
                 SecurityContextHolder.clearContext();
             }
             filterChain.doFilter(request, response);
-        } catch (ExpiredJwtException | UnsupportedJwtException | MalformedJwtException e) {
+        } catch (ExpiredJwtException | UnsupportedJwtException | MalformedJwtException | UsernameNotFoundException e) {
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             response.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
         }

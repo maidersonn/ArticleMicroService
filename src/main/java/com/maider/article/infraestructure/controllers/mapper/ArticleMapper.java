@@ -1,8 +1,8 @@
-package com.maider.article.controllers.mapper;
+package com.maider.article.infraestructure.controllers.mapper;
 
 import com.maider.article.domain.entities.Article;
-import com.maider.article.controllers.dto.ArticleCreationDTO;
-import com.maider.article.controllers.dto.ArticleDTO;
+import com.maider.article.domain.entities.dto.ArticleCreationDTO;
+import com.maider.article.domain.entities.dto.ArticleDTO;
 
 public class ArticleMapper {
     public static ArticleDTO toDto (Article article) {

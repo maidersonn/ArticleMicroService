@@ -1,8 +1,9 @@
-package com.maider.article.controllers.mapper;
+package com.maider.article.infrastructure.controllers.mapper;
 
-import com.maider.article.controllers.dto.ArticleCreationDTO;
-import com.maider.article.controllers.dto.ArticleDTO;
+import com.maider.article.domain.entities.dto.ArticleCreationDTO;
+import com.maider.article.domain.entities.dto.ArticleDTO;
 import com.maider.article.domain.entities.Article;
+import com.maider.article.infraestructure.controllers.mapper.ArticleMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 

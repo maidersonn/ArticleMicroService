@@ -1,4 +1,4 @@
-package com.maider.article.controllers.dto;
+package com.maider.article.domain.entities.dto;
 
 import java.io.Serializable;
 

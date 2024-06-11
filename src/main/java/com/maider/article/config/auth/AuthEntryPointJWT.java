@@ -1,4 +1,4 @@
-package com.maider.article.security;
+package com.maider.article.config.auth;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

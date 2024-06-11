@@ -1,23 +1,31 @@
 package com.maider.article.domain.entities;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-
-import java.util.ArrayList;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 
 @Entity
+@Table(name = "users",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = "username")
+        })
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    String name;
-    String[] roles;
+    @NotBlank
+    @Column(unique=true)
+    private String username;
+    @NotBlank
+    private String[] roles;
 
-    public User(Long id, String name,  String[] roles) {
+    public User(Long id, String username,  String[] roles) {
         this.id = id;
-        this.name = name;
+        this.username = username;
+        this.roles = roles;
+    }
+
+    public User(String username, @NotBlank String[] roles) {
+        this.username = username;
         this.roles = roles;
     }
 
@@ -30,11 +38,11 @@ public class User {
     }
 
     public String getName() {
-        return name;
+        return username;
     }
 
     public void setName(String name) {
-        this.name = name;
+        this.username = username;
     }
 
     public  String[] getRoles() {

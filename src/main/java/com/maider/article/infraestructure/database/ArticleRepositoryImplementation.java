@@ -1,4 +1,4 @@
-package com.maider.article.infrastructure;
+package com.maider.article.infraestructure.database;
 
 import com.maider.article.domain.entities.Article;
 import com.maider.article.domain.entities.ArticleFilter;

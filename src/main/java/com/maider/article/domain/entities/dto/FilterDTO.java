@@ -1,4 +1,4 @@
-package com.maider.article.controllers.dto;
+package com.maider.article.domain.entities.dto;
 
 public class FilterDTO {
     private String type;
