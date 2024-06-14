@@ -1,4 +1,4 @@
-package com.maider.article.infraestructure.controllers.mapper;
+package com.maider.article.infraestructure.mappers;
 
 import com.maider.article.domain.entities.Article;
 import com.maider.article.domain.entities.dto.ArticleCreationDTO;
