@@ -13,4 +13,9 @@ public class UserRepositoryImplementation implements UserRepositoy {
     public User findByUsername(String name) {
         return jpaUserRepository.findByUsername(name);
     }
+
+    @Override
+    public User save(User user) {
+        return jpaUserRepository.save(user);
+    }
 }
