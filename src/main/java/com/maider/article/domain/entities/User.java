@@ -2,6 +2,7 @@ package com.maider.article.domain.entities;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 
 @Entity
 @Table(name = "users",
@@ -15,7 +16,7 @@ public class User {
     @NotBlank
     @Column(unique=true)
     private String username;
-    @NotBlank
+    @NotEmpty
     private String[] roles;
 
     public User(Long id, String username,  String[] roles) {
