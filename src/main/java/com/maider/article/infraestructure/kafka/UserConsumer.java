@@ -13,7 +13,6 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.stereotype.Component;
 
-
 @Component
 public class UserConsumer {
     @Autowired
@@ -33,7 +32,7 @@ public class UserConsumer {
             groupId = "userGroup",
             containerFactory = "kafkaListenerContainerFactory")
     public void userListener(@Payload @Valid UserDTO userDTO) {
-        User user = mapper.toUser(userDTO);
-        userService.save(user);
+            User user = mapper.toUser(userDTO);
+            userService.save(user);
     }
 }

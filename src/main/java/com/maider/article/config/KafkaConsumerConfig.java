@@ -11,9 +11,8 @@ import org.springframework.kafka.annotation.EnableKafkaRetryTopic;
 import org.springframework.kafka.annotation.KafkaListenerConfigurer;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.KafkaListenerEndpointRegistrar;
-import org.springframework.kafka.core.ConsumerFactory;
-import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
-import org.springframework.kafka.support.serializer.JsonDeserializer;
+import org.springframework.kafka.core.*;
+import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
@@ -41,13 +40,14 @@ public class KafkaConsumerConfig  implements KafkaListenerConfigurer {
                 groupId);
         props.put(
                 ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
-                StringDeserializer.class);
+                ErrorHandlingDeserializer.class);
         props.put(
                 ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
-                JsonDeserializer.class);
-        return new DefaultKafkaConsumerFactory<>(props,
-                new StringDeserializer(),
-                new JsonDeserializer<>(UserDTO.class));
+                ErrorHandlingDeserializer.class);
+
+        props.put(ErrorHandlingDeserializer.KEY_DESERIALIZER_CLASS, StringDeserializer.class);
+        props.put(ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, UserDtoDeserializar.class);
+        return new DefaultKafkaConsumerFactory<>(props);
     }
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, UserDTO>
@@ -57,7 +57,6 @@ public class KafkaConsumerConfig  implements KafkaListenerConfigurer {
         factory.setConsumerFactory(userConsumerFactory());
         return factory;
     }
-
     @Override
     public void configureKafkaListeners(KafkaListenerEndpointRegistrar registrar) {
         registrar.setValidator(this.validator);
